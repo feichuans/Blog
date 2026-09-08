@@ -1,5 +1,6 @@
 ---
 import { SignatureGlassDemo } from '@/components/effects/GlassSignature'
+import PresenceIsland from "@/components/presence/PresenceIsland.astro";
 ---
 
 <html lang="zh-CN">
@@ -9,6 +10,7 @@ import { SignatureGlassDemo } from '@/components/effects/GlassSignature'
     <title>Glass Signature Demo</title>
   </head>
   <body>
+    <PresenceIsland />
     <SignatureGlassDemo client:only="react" />
   </body>
 </html>

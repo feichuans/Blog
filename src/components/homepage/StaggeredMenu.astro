@@ -69,20 +69,23 @@ const offscreen = position === "left" ? "-100%" : "100%";
     <a class="sm-logo" href="/" aria-label="Feichuan home">
       <img src={logoUrl} alt="" class="sm-logo-img" draggable="false" width="48" height="48" />
     </a>
-    <button
-      class="sm-toggle"
-      data-sm-toggle
-      aria-label="Open menu"
-      aria-expanded="false"
-      aria-controls="staggered-menu-panel"
-      type="button"
-    >
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
-        <line class="sm-toggle-line sm-toggle-line-top" x1="4" y1="8" x2="26" y2="8" />
-        <line class="sm-toggle-line sm-toggle-line-middle" x1="4" y1="15" x2="26" y2="15" />
-        <line class="sm-toggle-line sm-toggle-line-bottom" x1="4" y1="22" x2="26" y2="22" />
-      </svg>
-    </button>
+    <div class="sm-header-actions">
+      <div class="sm-presence-host" data-presence-host></div>
+      <button
+        class="sm-toggle"
+        data-sm-toggle
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="staggered-menu-panel"
+        type="button"
+      >
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+          <line class="sm-toggle-line sm-toggle-line-top" x1="4" y1="8" x2="26" y2="8" />
+          <line class="sm-toggle-line sm-toggle-line-middle" x1="4" y1="15" x2="26" y2="15" />
+          <line class="sm-toggle-line sm-toggle-line-bottom" x1="4" y1="22" x2="26" y2="22" />
+        </svg>
+      </button>
+    </div>
   </header>
 
   <aside id="staggered-menu-panel" class="staggered-menu-panel" data-sm-panel hidden inert aria-hidden="true">
@@ -273,8 +276,19 @@ const offscreen = position === "left" ? "-100%" : "100%";
   }
 
   .sm-logo,
-  .sm-toggle {
+  .sm-header-actions {
     pointer-events: auto;
+  }
+
+  .sm-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sm-presence-host {
+    display: flex;
+    align-items: center;
   }
 
   .sm-logo {

@@ -1,5 +1,6 @@
 ---
 import DappledBaseline from "../../../.web-shader-extractor/baseline/DappledBaseline";
+import PresenceIsland from "@/components/presence/PresenceIsland.astro";
 ---
 
 <!doctype html>
@@ -11,6 +12,7 @@ import DappledBaseline from "../../../.web-shader-extractor/baseline/DappledBase
     <title>Dappled light</title>
   </head>
   <body>
+    <PresenceIsland />
     <DappledBaseline client:only="react" />
   </body>
 </html>

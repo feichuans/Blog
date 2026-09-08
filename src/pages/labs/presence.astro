@@ -1,39 +1,40 @@
 ---
 import Base from "@/layouts/Base.astro";
-import { PresenceLayer } from "@/components/presence/PresenceLayer";
-import { presenceRoomFromPath } from "@/lib/presence/url";
+import {
+  PRESENCE_SITE_ROOM,
+  presencePathFromLocation,
+} from "@/lib/presence/url";
 
-const room = presenceRoomFromPath(Astro.url.pathname);
+const path = presencePathFromLocation(Astro.url.pathname);
 ---
 
 <Base
   title="Presence"
-  description="打开开关后，同页的人能看见彼此的光标和在场人数。"
+  description="打开开关后计入全站在场人数；同页的人能看见彼此光标。"
   enableIntro={false}
 >
-  <PresenceLayer client:load room={room} />
   <main class="presence-lab">
     <header>
       <p class="kicker">Labs · Presence</p>
-      <h1>谁还在这页上</h1>
+      <h1>谁还在站上</h1>
       <p class="lede">
-        不是协同编辑。左下角那个开关默认关；打开之后才会连上，也只会和其他同样打开的人互相看见。
+        不是协同编辑。右上角绿点和数字是全站入口，默认关。打开后计入全站在场人数；指针只和停在同一路径的人互相看见（不同页的文档坐标对不上）。
       </p>
     </header>
 
     <section>
       <h2>怎么试</h2>
       <ol>
-        <li>打开左下角「在场」。</li>
-        <li>再用另一个窗口打开这同一页，也打开开关。</li>
-        <li>移动鼠标、滚一下。光标按文档坐标同步，应对上同一段文字附近。</li>
+        <li>点击右上角的绿点和数字。首页、About、文章页都是同一个全站房间。</li>
+        <li>再用另一个窗口打开这同一页，也打开入口，移动、点击或选择文字。</li>
+        <li>人数是全站合计；指针及其状态只在同路径（这页是 <code>{path}</code>）出现。</li>
       </ol>
     </section>
 
     <section>
       <h2>房间怎么切</h2>
       <p>
-        一页一个房间，路径就是房间名。这页是 <code>{room}</code>。文章页各自独立，互不串人。
+        全站一个房间 <code>{PRESENCE_SITE_ROOM}</code>。你在 About、别人在文章页，人数会一起涨；但只有同路径才会画出对方的指针。
       </p>
     </section>
 
@@ -43,7 +44,7 @@ const room = presenceRoomFromPath(Astro.url.pathname);
         Lenis 把滚动做在内容位移上。如果坐标只看视口，两个人滚到不同段落时，光标会漂在错误的字上。所以这里发的是文档相对位置。
       </p>
       <p>
-        纸面上的字会跟着滚动走，别人的点也应该钉在同一段。往下多滚一点，让第二个窗口停在另一段，再看点会不会跟着内容走。
+        纸面上的字会跟着滚动走，别人的指针也应该钉在同一段。往下多滚一点，让第二个窗口停在另一段，再看指针会不会跟着内容走。
       </p>
     </section>
 
@@ -53,7 +54,7 @@ const room = presenceRoomFromPath(Astro.url.pathname);
         河对岸的灯先亮，风后到。句子本身不重要，重要的是两个人的指针是不是落在同一行附近。再往下还有几屏。
       </p>
       <p>
-        若只有一个人打开开关，人数是 1，屏幕上不会出现第二颗点。关开关会立刻断线，不再广播。
+        若只有一个人打开入口，人数是 1，屏幕上不会出现别人的指针。再次点击入口会立刻断线，不再广播。
       </p>
     </section>
 

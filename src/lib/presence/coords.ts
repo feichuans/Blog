@@ -57,10 +57,9 @@ export function docToViewport(
   };
 }
 
+/** 只要有精细指针就广播；触控笔电上 fine+coarse 常同时为真，不能把 coarse 当成否决。 */
 export function prefersFinePointer(): boolean {
   return (
-    typeof matchMedia === "function" &&
-    matchMedia("(pointer: fine)").matches &&
-    !matchMedia("(pointer: coarse)").matches
+    typeof matchMedia !== "function" || matchMedia("(pointer: fine)").matches
   );
 }

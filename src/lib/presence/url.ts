@@ -1,12 +1,22 @@
-export function presenceRoomFromPath(pathname: string): string {
+/** 全站共用一个 Durable Object 房间，人数是合计。 */
+export const PRESENCE_SITE_ROOM = "site";
+
+/** 规范化 pathname，用于「同页才画光标」。 */
+export function presencePathFromLocation(pathname: string): string {
   const trimmed = pathname.replace(/\/+$/, "");
   return trimmed.length > 0 ? trimmed : "/";
 }
 
+/** @deprecated 旧按页分房 API；保留给文档页展示当前 path。 */
+export function presenceRoomFromPath(pathname: string): string {
+  return presencePathFromLocation(pathname);
+}
+
 /** 未单独配置时走同域 `/presence`，Astro 7 的自定义 Worker 会转给 Durable Object。 */
-export function presenceSocketUrl(room: string): string {
+export function presenceSocketUrl(room: string, path: string): string {
   const url = new URL("/presence", presenceOrigin());
   url.searchParams.set("room", room);
+  url.searchParams.set("path", path);
   return url.toString();
 }
 

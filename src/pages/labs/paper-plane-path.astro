@@ -1,5 +1,6 @@
 ---
 import PaperPlanePath from "@/components/labs/PaperPlanePath";
+import PresenceIsland from "@/components/presence/PresenceIsland.astro";
 ---
 
 <!doctype html>
@@ -93,6 +94,7 @@ import PaperPlanePath from "@/components/labs/PaperPlanePath";
     </style>
   </head>
   <body>
+    <PresenceIsland />
     <PaperPlanePath client:only="react" />
   </body>
 </html>

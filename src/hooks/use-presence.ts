@@ -3,7 +3,11 @@ import {
   pointerToDoc,
   prefersFinePointer,
 } from "@/lib/presence/coords";
-import { isServerMessage, type PresencePeer } from "@/lib/presence/protocol";
+import {
+  isServerMessage,
+  type PresenceCursorState,
+  type PresencePeer,
+} from "@/lib/presence/protocol";
 import { presenceSocketUrl } from "@/lib/presence/url";
 
 export type PresenceStatus = "off" | "connecting" | "live" | "error";
@@ -27,22 +31,55 @@ export function writePresenceOptIn(on: boolean) {
 const CURSOR_MS = 70;
 const PING_MS = 25_000;
 
-export function usePresence(room: string, enabled: boolean) {
+function hasSelectableTextAt(e: PointerEvent, target: HTMLElement): boolean {
+  if (getComputedStyle(target).userSelect === "none") return false;
+
+  const caret = document.caretPositionFromPoint?.(e.clientX, e.clientY);
+  if (caret?.offsetNode.nodeType === Node.TEXT_NODE) return true;
+
+  const legacyRange = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+  return legacyRange?.startContainer.nodeType === Node.TEXT_NODE;
+}
+
+function cursorStateAt(e: PointerEvent): PresenceCursorState {
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+  if (!(target instanceof HTMLElement)) {
+    return e.buttons ? "click" : "default";
+  }
+
+  const cssCursor = getComputedStyle(target).cursor;
+  const isText =
+    /text|vertical-text/.test(cssCursor) ||
+    Boolean(target.closest("input, textarea, [contenteditable='true']")) ||
+    hasSelectableTextAt(e, target);
+  const isAction = /pointer/.test(cssCursor) ||
+    Boolean(target.closest("a[href], button, summary, label, select"));
+
+  if (target.matches(":disabled") || /not-allowed|no-drop/.test(cssCursor)) {
+    return "blocked";
+  }
+  if (/grabbing/.test(cssCursor)) return "grabbing";
+  if (/grab/.test(cssCursor)) return e.buttons ? "grabbing" : "grab";
+  if (/move|all-scroll|crosshair|resize/.test(cssCursor)) return "move";
+  if (isAction) return e.buttons ? "click" : "pointer";
+  if (isText) return e.buttons ? "select" : "text";
+  return e.buttons ? "click" : "default";
+}
+
+export function usePresence(room: string, path: string, enabled: boolean) {
   const [status, setStatus] = useState<PresenceStatus>("off");
   const [count, setCount] = useState(0);
-  const [selfColor, setSelfColor] = useState<string | null>(null);
   const [peers, setPeers] = useState<PresencePeer[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const selfIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!enabled || !room) {
+    if (!enabled || !room || !path) {
       wsRef.current?.close();
       wsRef.current = null;
       selfIdRef.current = null;
       setStatus("off");
       setCount(0);
-      setSelfColor(null);
       setPeers([]);
       return;
     }
@@ -53,13 +90,17 @@ export function usePresence(room: string, enabled: boolean) {
     let attempt = 0;
 
     const applyHello = (peersIn: PresencePeer[], selfId: string) => {
-      setPeers(peersIn.filter((peer) => peer.id !== selfId));
+      setPeers(
+        peersIn
+          .filter((peer) => peer.id !== selfId)
+          .map((peer) => ({ ...peer, cursor: peer.cursor ?? "default" })),
+      );
     };
 
     const connect = () => {
       if (cancelled) return;
       setStatus("connecting");
-      const socket = new WebSocket(presenceSocketUrl(room));
+      const socket = new WebSocket(presenceSocketUrl(room, path));
       wsRef.current = socket;
 
       socket.addEventListener("open", () => {
@@ -84,7 +125,6 @@ export function usePresence(room: string, enabled: boolean) {
 
         if (payload.type === "hello") {
           selfIdRef.current = payload.self.id;
-          setSelfColor(payload.self.color);
           setCount(payload.count);
           applyHello(payload.peers, payload.self.id);
           return;
@@ -95,7 +135,14 @@ export function usePresence(room: string, enabled: boolean) {
             if (prev.some((peer) => peer.id === payload.peer.id)) return prev;
             return [
               ...prev,
-              { id: payload.peer.id, color: payload.peer.color, x: null, y: null },
+              {
+                id: payload.peer.id,
+                color: payload.peer.color,
+                path: payload.peer.path,
+                x: null,
+                y: null,
+                cursor: "default",
+              },
             ];
           });
           return;
@@ -108,7 +155,13 @@ export function usePresence(room: string, enabled: boolean) {
         setPeers((prev) =>
           prev.map((peer) =>
             peer.id === payload.id
-              ? { ...peer, x: payload.x, y: payload.y }
+              ? {
+                  ...peer,
+                  path: payload.path,
+                  x: payload.x,
+                  y: payload.y,
+                  cursor: payload.cursor,
+                }
               : peer,
           ),
         );
@@ -137,25 +190,41 @@ export function usePresence(room: string, enabled: boolean) {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [enabled, room]);
+  }, [enabled, room, path]);
 
   useEffect(() => {
     if (!enabled || !prefersFinePointer()) return;
 
     let last = 0;
-    const send = (e: PointerEvent) => {
+    const send = (e: PointerEvent, force = false) => {
       const socket = wsRef.current;
       if (!socket || socket.readyState !== WebSocket.OPEN) return;
       const now = performance.now();
-      if (now - last < CURSOR_MS) return;
+      if (!force && now - last < CURSOR_MS) return;
       last = now;
       const point = pointerToDoc(e);
-      socket.send(JSON.stringify({ type: "cursor", x: point.x, y: point.y }));
+      socket.send(
+        JSON.stringify({
+          type: "cursor",
+          x: point.x,
+          y: point.y,
+          cursor: cursorStateAt(e),
+        }),
+      );
     };
+    const sendImmediately = (e: PointerEvent) => send(e, true);
 
     window.addEventListener("pointermove", send, { passive: true });
-    return () => window.removeEventListener("pointermove", send);
+    window.addEventListener("pointerdown", sendImmediately, { passive: true });
+    window.addEventListener("pointerup", sendImmediately, { passive: true });
+    window.addEventListener("pointercancel", sendImmediately, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", send);
+      window.removeEventListener("pointerdown", sendImmediately);
+      window.removeEventListener("pointerup", sendImmediately);
+      window.removeEventListener("pointercancel", sendImmediately);
+    };
   }, [enabled]);
 
-  return { status, count, selfColor, peers };
+  return { status, count, peers };
 }

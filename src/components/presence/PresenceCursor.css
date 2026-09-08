@@ -1,0 +1,106 @@
+.presence-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9990;
+  width: 1.5rem;
+  height: 1.5rem;
+  pointer-events: none;
+  transition:
+    transform 80ms linear,
+    opacity 160ms ease;
+}
+
+.presence-cursor-glyph {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: var(--presence-color);
+  filter:
+    drop-shadow(0 0 1px color-mix(in oklab, white 90%, transparent))
+    drop-shadow(0 3px 5px color-mix(in oklab, black 24%, transparent));
+  transform-origin: 25% 20%;
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.presence-cursor-glyph svg {
+  width: 100%;
+  height: 100%;
+  fill: color-mix(in oklab, var(--presence-color) 18%, white);
+  stroke: currentColor;
+  stroke-width: 2.4;
+}
+
+.presence-cursor[data-cursor="default"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="pointer"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="click"] .presence-cursor-glyph {
+  transform: translate(-0.2rem, -0.15rem);
+}
+
+.presence-cursor[data-cursor="text"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="select"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="move"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="grab"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="grabbing"] .presence-cursor-glyph,
+.presence-cursor[data-cursor="blocked"] .presence-cursor-glyph {
+  transform: translate(-50%, -50%);
+}
+
+.presence-cursor[data-cursor="select"] .presence-cursor-glyph {
+  transform: translate(-50%, -50%) scale(0.82);
+}
+
+.presence-cursor[data-cursor="select"] .presence-cursor-glyph::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 2px solid color-mix(in oklab, var(--presence-color) 64%, transparent);
+  border-radius: 50%;
+  content: "";
+  animation: presence-select-pulse 480ms ease-out infinite alternate;
+}
+
+.presence-cursor[data-cursor="click"] .presence-cursor-glyph {
+  transform: translate(-0.2rem, -0.15rem) scale(0.78);
+}
+
+.presence-cursor[data-cursor="grabbing"] .presence-cursor-glyph {
+  transform: translate(-50%, -50%) scale(0.86);
+}
+
+.presence-cursor[data-hidden="true"] {
+  opacity: 0;
+}
+
+@keyframes presence-select-pulse {
+  from {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+}
+
+@media (pointer: coarse) {
+  .presence-cursor {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presence-cursor,
+  .presence-cursor-glyph {
+    transition: none;
+  }
+
+  .presence-cursor[data-cursor="select"] .presence-cursor-glyph::after {
+    animation: none;
+  }
+}

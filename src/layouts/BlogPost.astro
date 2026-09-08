@@ -3,9 +3,7 @@ import { type CollectionEntry, getCollection, render } from "astro:content";
 import FormattedDate from "../components/blog/FormattedDate.astro";
 import Base from "./Base.astro";
 import ReaderControls from "@/components/blog/ReaderControls";
-import { PresenceLayer } from "@/components/presence/PresenceLayer";
 import ScrollIsland from "@/components/blog/ScrollIsland.astro";
-import { presenceRoomFromPath } from "@/lib/presence/url";
 import { HoverLinkEnhancer } from "@/components/ui/HoverPreview";
 
 import "../styles/reader-themes.css";
@@ -17,7 +15,6 @@ type Props = CollectionEntry<"blog">["data"] & {
 const { title, description, banner, dateCreated, dateModified, tags, headings = [] } =
   Astro.props;
 const bannerURL = typeof banner === "string" ? banner : banner?.src;
-const presenceRoom = presenceRoomFromPath(Astro.url.pathname);
 ---
 
 <Base
@@ -74,7 +71,6 @@ const presenceRoom = presenceRoomFromPath(Astro.url.pathname);
     })();
   </script>
 
-  <PresenceLayer client:load room={presenceRoom} />
   <div id="reader-root" data-reader-theme="light">
     {/* 阅读进度条 */}
     <div class="reader-progress-bar"></div>

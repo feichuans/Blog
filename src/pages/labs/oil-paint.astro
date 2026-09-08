@@ -1,5 +1,6 @@
 ---
 import OilPaintStudio from "@/components/labs/oil-paint/OilPaintStudio";
+import PresenceIsland from "@/components/presence/PresenceIsland.astro";
 ---
 
 <!doctype html>
@@ -16,6 +17,7 @@ import OilPaintStudio from "@/components/labs/oil-paint/OilPaintStudio";
     />
   </head>
   <body>
+    <PresenceIsland />
     <OilPaintStudio client:only="react" />
   </body>
 </html>

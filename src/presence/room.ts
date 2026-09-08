@@ -1,9 +1,12 @@
 import { DurableObject } from "cloudflare:workers";
 import {
   PRESENCE_COLORS,
+  isPresenceCursorState,
+  type PresenceCursorState,
   type PresencePeer,
   type ServerMessage,
 } from "../lib/presence/protocol";
+import { presencePathFromLocation } from "../lib/presence/url";
 
 export type PresenceEnv = {
   PRESENCE: DurableObjectNamespace<PresenceRoom>;
@@ -12,8 +15,10 @@ export type PresenceEnv = {
 type Session = {
   id: string;
   color: string;
+  path: string;
   x: number | null;
   y: number | null;
+  cursor: PresenceCursorState;
 };
 
 function colorFor(id: string): string {
@@ -58,23 +63,33 @@ export class PresenceRoom extends DurableObject<PresenceEnv> {
       return Response.json({ count: this.ctx.getWebSockets().length });
     }
 
+    const url = new URL(request.url);
+    const path = presencePathFromLocation(url.searchParams.get("path") ?? "/");
+
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
     this.ctx.acceptWebSocket(server);
 
     const id = crypto.randomUUID();
     const color = colorFor(id);
-    const session: Session = { id, color, x: null, y: null };
+    const session: Session = {
+      id,
+      color,
+      path,
+      x: null,
+      y: null,
+      cursor: "default",
+    };
     server.serializeAttachment(session);
 
     const count = this.ctx.getWebSockets().length;
     this.send(server, {
       type: "hello",
-      self: { id, color },
+      self: { id, color, path },
       peers: this.listPeers(server),
       count,
     });
-    this.broadcast({ type: "join", peer: { id, color }, count }, server);
+    this.broadcast({ type: "join", peer: { id, color, path }, count }, server);
 
     return new Response(null, { status: 101, webSocket: client });
   }
@@ -90,7 +105,12 @@ export class PresenceRoom extends DurableObject<PresenceEnv> {
     }
     if (!data || typeof data !== "object") return;
 
-    const msg = data as { type?: string; x?: number; y?: number };
+    const msg = data as {
+      type?: string;
+      x?: number;
+      y?: number;
+      cursor?: unknown;
+    };
     if (msg.type !== "cursor") return;
 
     const x = clamp01(msg.x);
@@ -99,10 +119,24 @@ export class PresenceRoom extends DurableObject<PresenceEnv> {
 
     const session = (ws.deserializeAttachment() ?? {}) as Session;
     if (!session.id) return;
+    const cursor = isPresenceCursorState(msg.cursor)
+      ? msg.cursor
+      : "default";
     session.x = x;
     session.y = y;
+    session.cursor = cursor;
     ws.serializeAttachment(session);
-    this.broadcast({ type: "cursor", id: session.id, x, y }, ws);
+    this.broadcast(
+      {
+        type: "cursor",
+        id: session.id,
+        path: session.path,
+        x,
+        y,
+        cursor,
+      },
+      ws,
+    );
   }
 
   async webSocketClose(ws: WebSocket) {
@@ -134,8 +168,10 @@ export class PresenceRoom extends DurableObject<PresenceEnv> {
       peers.push({
         id: session.id,
         color: session.color,
+        path: session.path,
         x: session.x,
         y: session.y,
+        cursor: session.cursor ?? "default",
       });
     }
     return peers;

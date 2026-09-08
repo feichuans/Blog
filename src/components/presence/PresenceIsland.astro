@@ -1,0 +1,17 @@
+---
+import { PresenceLayer } from "./PresenceLayer";
+import {
+  PRESENCE_SITE_ROOM,
+  presencePathFromLocation,
+} from "@/lib/presence/url";
+
+const path = presencePathFromLocation(Astro.url.pathname);
+const { inNav = false } = Astro.props;
+---
+
+<PresenceLayer
+  client:load
+  room={PRESENCE_SITE_ROOM}
+  path={path}
+  placement={inNav ? "nav" : "fixed"}
+/>

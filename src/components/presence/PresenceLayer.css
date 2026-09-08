@@ -1,46 +1,68 @@
 .presence-layer {
+  position: relative;
+  z-index: 9990;
   pointer-events: none;
 }
 
 .presence-dock {
-  position: fixed;
-  left: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 24;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   pointer-events: auto;
+  transition: opacity var(--fc-motion-hover, 180ms ease);
+}
+
+.presence-dock[data-placement="fixed"] {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10001;
 }
 
 .presence-toggle {
   display: inline-flex;
+  min-width: 2.75rem;
+  min-height: 1.875rem;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2.5rem;
-  padding: 0 0.75rem 0 0.65rem;
-  border: 1px solid var(--fc-border, #e8e2d4);
+  justify-content: center;
+  gap: 0;
+  padding: 0 0.65rem;
+  color: var(--fc-ink, #141413);
+  background: color-mix(
+    in oklab,
+    var(--fc-surface-raised, #fff9f0) 82%,
+    transparent
+  );
+  border: 1px solid color-mix(
+    in oklab,
+    var(--fc-border, #e8e2d4) 76%,
+    transparent
+  );
   border-radius: 999px;
-  background: color-mix(in oklab, var(--fc-surface-raised, #fff9f0) 88%, transparent);
-  color: var(--fc-ink-muted, #555);
+  box-shadow: 0 4px 16px color-mix(in oklab, black 7%, transparent);
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1;
   cursor: pointer;
   backdrop-filter: blur(12px);
   transition:
     color var(--fc-motion-hover, 180ms ease),
     border-color var(--fc-motion-hover, 180ms ease),
-    background-color var(--fc-motion-hover, 180ms ease);
+    background-color var(--fc-motion-hover, 180ms ease),
+    box-shadow var(--fc-motion-hover, 180ms ease);
 }
 
-.presence-toggle:hover {
+.presence-toggle:hover,
+.presence-toggle:focus-visible {
   color: var(--fc-ink, #141413);
+  background: color-mix(
+    in oklab,
+    var(--fc-surface-raised, #fff9f0) 94%,
+    transparent
+  );
   border-color: var(--fc-border-strong, #d5cfc0);
-}
-
-.presence-toggle[data-on="true"] {
-  color: var(--fc-ink, #141413);
-  border-color: color-mix(in oklab, var(--presence-self, var(--fc-accent, #4385be)) 45%, var(--fc-border));
+  box-shadow: 0 6px 22px color-mix(in oklab, black 11%, transparent);
 }
 
 .presence-toggle:focus-visible {
@@ -51,36 +73,48 @@
 .presence-dot {
   width: 0.5rem;
   height: 0.5rem;
+  flex: 0 0 auto;
+  margin-right: 0.4rem;
   border-radius: 50%;
-  background: var(--presence-self, var(--fc-ink-meta, #888));
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--presence-self, #888) 22%, transparent);
+  background: #28a745;
+  box-shadow: 0 0 0 3px color-mix(in oklab, #28a745 18%, transparent);
+}
+
+.presence-toggle[data-status="connecting"] .presence-dot,
+.presence-toggle[data-status="error"] .presence-dot {
+  animation: presence-dot-pulse 900ms ease-in-out infinite alternate;
 }
 
 .presence-toggle[data-on="false"] .presence-dot {
-  background: var(--fc-ink-meta, #888);
+  opacity: 0.46;
   box-shadow: none;
-  opacity: 0.55;
 }
 
-.presence-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 23;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  background: var(--presence-color);
-  box-shadow:
-    0 0 0 2px color-mix(in oklab, white 70%, transparent),
-    0 4px 12px color-mix(in oklab, var(--presence-color) 35%, transparent);
-  pointer-events: none;
-  transition: transform 80ms linear, opacity 160ms ease;
+.presence-count {
+  min-width: 0.55rem;
+  text-align: center;
 }
 
-.presence-cursor[data-hidden="true"] {
+.presence-detail {
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
   opacity: 0;
+  white-space: nowrap;
+  transform: translateX(-0.2rem);
+  transition:
+    max-width 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    margin-left 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 140ms ease,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.presence-toggle:hover .presence-detail,
+.presence-toggle:focus-visible .presence-detail {
+  max-width: 6rem;
+  margin-left: 0.4rem;
+  opacity: 1;
+  transform: translateX(0);
 }
 
 body:has(.staggered-menu-wrapper[data-open]) .presence-dock {
@@ -88,8 +122,28 @@ body:has(.staggered-menu-wrapper[data-open]) .presence-dock {
   pointer-events: none;
 }
 
-@media (pointer: coarse) {
-  .presence-cursor {
-    display: none;
+@keyframes presence-dot-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 640px) {
+  .presence-dock[data-placement="fixed"] {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presence-dock,
+  .presence-toggle,
+  .presence-detail {
+    transition: none;
+  }
+
+  .presence-toggle[data-status="connecting"] .presence-dot,
+  .presence-toggle[data-status="error"] .presence-dot {
+    animation: none;
   }
 }
