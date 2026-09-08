@@ -1,0 +1,95 @@
+.presence-layer {
+  pointer-events: none;
+}
+
+.presence-dock {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 24;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.presence-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem 0 0.65rem;
+  border: 1px solid var(--fc-border, #e8e2d4);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--fc-surface-raised, #fff9f0) 88%, transparent);
+  color: var(--fc-ink-muted, #555);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition:
+    color var(--fc-motion-hover, 180ms ease),
+    border-color var(--fc-motion-hover, 180ms ease),
+    background-color var(--fc-motion-hover, 180ms ease);
+}
+
+.presence-toggle:hover {
+  color: var(--fc-ink, #141413);
+  border-color: var(--fc-border-strong, #d5cfc0);
+}
+
+.presence-toggle[data-on="true"] {
+  color: var(--fc-ink, #141413);
+  border-color: color-mix(in oklab, var(--presence-self, var(--fc-accent, #4385be)) 45%, var(--fc-border));
+}
+
+.presence-toggle:focus-visible {
+  outline: 2px solid var(--fc-border-focus, currentColor);
+  outline-offset: 3px;
+}
+
+.presence-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--presence-self, var(--fc-ink-meta, #888));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--presence-self, #888) 22%, transparent);
+}
+
+.presence-toggle[data-on="false"] .presence-dot {
+  background: var(--fc-ink-meta, #888);
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+.presence-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 23;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--presence-color);
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, white 70%, transparent),
+    0 4px 12px color-mix(in oklab, var(--presence-color) 35%, transparent);
+  pointer-events: none;
+  transition: transform 80ms linear, opacity 160ms ease;
+}
+
+.presence-cursor[data-hidden="true"] {
+  opacity: 0;
+}
+
+body:has(.staggered-menu-wrapper[data-open]) .presence-dock {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .presence-cursor {
+    display: none;
+  }
+}

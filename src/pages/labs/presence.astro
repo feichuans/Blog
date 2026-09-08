@@ -1,0 +1,128 @@
+---
+import Base from "@/layouts/Base.astro";
+import { PresenceLayer } from "@/components/presence/PresenceLayer";
+import { presenceRoomFromPath } from "@/lib/presence/url";
+
+const room = presenceRoomFromPath(Astro.url.pathname);
+---
+
+<Base
+  title="Presence"
+  description="打开开关后，同页的人能看见彼此的光标和在场人数。"
+  enableIntro={false}
+>
+  <PresenceLayer client:load room={room} />
+  <main class="presence-lab">
+    <header>
+      <p class="kicker">Labs · Presence</p>
+      <h1>谁还在这页上</h1>
+      <p class="lede">
+        不是协同编辑。左下角那个开关默认关；打开之后才会连上，也只会和其他同样打开的人互相看见。
+      </p>
+    </header>
+
+    <section>
+      <h2>怎么试</h2>
+      <ol>
+        <li>打开左下角「在场」。</li>
+        <li>再用另一个窗口打开这同一页，也打开开关。</li>
+        <li>移动鼠标、滚一下。光标按文档坐标同步，应对上同一段文字附近。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>房间怎么切</h2>
+      <p>
+        一页一个房间，路径就是房间名。这页是 <code>{room}</code>。文章页各自独立，互不串人。
+      </p>
+    </section>
+
+    <section>
+      <h2>往下滚</h2>
+      <p>
+        Lenis 把滚动做在内容位移上。如果坐标只看视口，两个人滚到不同段落时，光标会漂在错误的字上。所以这里发的是文档相对位置。
+      </p>
+      <p>
+        纸面上的字会跟着滚动走，别人的点也应该钉在同一段。往下多滚一点，让第二个窗口停在另一段，再看点会不会跟着内容走。
+      </p>
+    </section>
+
+    <section>
+      <h2>一段占位，用来对光标</h2>
+      <p>
+        河对岸的灯先亮，风后到。句子本身不重要，重要的是两个人的指针是不是落在同一行附近。再往下还有几屏。
+      </p>
+      <p>
+        若只有一个人打开开关，人数是 1，屏幕上不会出现第二颗点。关开关会立刻断线，不再广播。
+      </p>
+    </section>
+
+    <section>
+      <h2>再往下</h2>
+      <p>
+        生产环境的 Durable Object 需要 Workers Paid。本地 <code>astro dev</code> 就能测 WebSocket。手机粗指针不画光标，只保留开关。
+      </p>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .presence-lab {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 7rem 1.5rem 40rem;
+    color: var(--fc-ink);
+  }
+
+  .kicker {
+    margin: 0 0 0.75rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fc-ink-meta);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2.4rem;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  .lede,
+  p,
+  li {
+    color: var(--fc-ink-2);
+    line-height: 1.8;
+  }
+
+  .lede {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+  }
+
+  section {
+    margin-top: 3.5rem;
+  }
+
+  h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1.25rem;
+  }
+
+  ol {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  li + li {
+    margin-top: 0.4rem;
+  }
+
+  code {
+    font-size: 0.9em;
+    padding: 0.1em 0.35em;
+    border-radius: 0.3rem;
+    background: var(--fc-surface-sunken);
+  }
+</style>

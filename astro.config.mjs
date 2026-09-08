@@ -42,6 +42,11 @@ export default defineConfig({
         optional: true,
         default: "https://api.umami.is/v1",
       }),
+      PUBLIC_PRESENCE_URL: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
     },
   },
   integrations: [
