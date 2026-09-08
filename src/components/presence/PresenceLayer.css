@@ -27,25 +27,17 @@
   gap: 0;
   padding: 0 0.65rem;
   color: var(--fc-ink, #141413);
-  background: color-mix(
-    in oklab,
-    var(--fc-surface-raised, #fff9f0) 82%,
-    transparent
-  );
-  border: 1px solid color-mix(
-    in oklab,
-    var(--fc-border, #e8e2d4) 76%,
-    transparent
-  );
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 999px;
-  box-shadow: 0 4px 16px color-mix(in oklab, black 7%, transparent);
+  box-shadow: none;
+  backdrop-filter: none;
   font: inherit;
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  backdrop-filter: blur(12px);
   transition:
     color var(--fc-motion-hover, 180ms ease),
     border-color var(--fc-motion-hover, 180ms ease),
@@ -56,13 +48,9 @@
 .presence-toggle:hover,
 .presence-toggle:focus-visible {
   color: var(--fc-ink, #141413);
-  background: color-mix(
-    in oklab,
-    var(--fc-surface-raised, #fff9f0) 94%,
-    transparent
-  );
-  border-color: var(--fc-border-strong, #d5cfc0);
-  box-shadow: 0 6px 22px color-mix(in oklab, black 11%, transparent);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .presence-toggle:focus-visible {
