@@ -1,8 +1,13 @@
 ---
 import Base from "@/layouts/Base.astro";
 
-// 使用 Astro.glob 批量读取 components/tools 下的所有 .astro 文件
-const tools = await Astro.glob("../../components/tools/*.astro");
+const toolModules = import.meta.glob("../../components/tools/*.astro", {
+  eager: true,
+});
+const tools = Object.entries(toolModules).map(([file, mod]) => ({
+  file,
+  default: (mod as { default: () => unknown }).default,
+}));
 
 // Helper to get name
 const getToolName = (file: string) => {

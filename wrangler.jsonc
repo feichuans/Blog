@@ -1,9 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "blog",
-  "main": "./dist/_worker.js/index.js",
-  // 更新为今天的日期
-  "compatibility_date": "2025-10-20",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-09-08",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",

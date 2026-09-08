@@ -9,12 +9,15 @@ import react from "@astrojs/react";
 
 
 import cloudflare from "@astrojs/cloudflare";
+import { unified } from "@astrojs/markdown-remark";
 import remarkToc from "remark-toc";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   site: "https://feichuans.com",
+  // Astro 7 默认 compressHTML: 'jsx' 会吃掉行内元素之间的空格，先保持旧行为。
+  compressHTML: true,
   env: {
     schema: {
       UMAMI_API_KEY: envField.string({
@@ -82,11 +85,18 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   prefetch: true,
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    // 预渲染仍走 Node：sharp / 本地 fs 与 workerd 不兼容。线上请求仍是 Workers。
+    imageService: "compile",
+    prerenderEnvironment: "node",
+  }),
   markdown: {
-    remarkPlugins: [
-      [remarkToc, { heading: "Toc" }],
-      remarkAlert,
-    ],
+    // Astro 7 默认 Sätteri，不再带 remark。TOC / GitHub alert 还靠 unified。
+    processor: unified({
+      remarkPlugins: [
+        [remarkToc, { heading: "Toc" }],
+        remarkAlert,
+      ],
+    }),
   },
 });

@@ -1,5 +1,5 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:content";
+import { z } from "astro/zod";
 import { umami } from "./umami";
 
 const ALLOWED_ACTION_ORIGINS = new Set([
