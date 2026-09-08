@@ -71,6 +71,7 @@ const offscreen = position === "left" ? "-100%" : "100%";
     </a>
     <div class="sm-header-actions">
       <div class="sm-presence-host" data-presence-host></div>
+      <div class="sm-chat-host" data-chat-host></div>
       <button
         class="sm-toggle"
         data-sm-toggle
@@ -169,6 +170,7 @@ const offscreen = position === "left" ? "-100%" : "100%";
       toggle.setAttribute("aria-label", next ? "Close menu" : "Open menu");
       panel.setAttribute("aria-hidden", String(!next));
       wrapper.toggleAttribute("data-open", next);
+      if (next) window.dispatchEvent(new Event("site-menu-open"));
     };
 
     const animateIcon = (opening: boolean) => {
@@ -286,7 +288,8 @@ const offscreen = position === "left" ? "-100%" : "100%";
     gap: 0.75rem;
   }
 
-  .sm-presence-host {
+  .sm-presence-host,
+  .sm-chat-host {
     display: flex;
     align-items: center;
   }

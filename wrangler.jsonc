@@ -13,6 +13,10 @@
       {
         "name": "PRESENCE",
         "class_name": "PresenceRoom"
+      },
+      {
+        "name": "CHAT",
+        "class_name": "ChatRoom"
       }
     ]
   },
@@ -20,6 +24,10 @@
     {
       "tag": "v1",
       "new_sqlite_classes": ["PresenceRoom"]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": ["ChatRoom"]
     }
   ],
   "observability": {

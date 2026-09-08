@@ -1,5 +1,6 @@
 ---
-import { PresenceLayer } from "./PresenceLayer";
+import { ChatDock } from "@/components/chat/ChatDock";
+import { PresenceLayer } from "@/components/presence/PresenceLayer";
 import {
   PRESENCE_SITE_ROOM,
   presencePathFromLocation,
@@ -7,11 +8,13 @@ import {
 
 const path = presencePathFromLocation(Astro.url.pathname);
 const { inNav = false } = Astro.props;
+const placement = inNav ? "nav" : "fixed";
 ---
 
 <PresenceLayer
   client:load
   room={PRESENCE_SITE_ROOM}
   path={path}
-  placement={inNav ? "nav" : "fixed"}
+  placement={placement}
 />
+<ChatDock client:load placement={placement} />
