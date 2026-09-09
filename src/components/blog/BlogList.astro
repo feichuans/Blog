@@ -16,15 +16,23 @@ function formatDate(date: Date) {
 ---
 
 <div class="blog-list">
+  <p class="visitor-count" data-visitor-count hidden>
+    当前 <span data-active-visitors>0</span> 人正在看
+  </p>
   {
     posts.map((p) => {
       const path = `/blogs/${p.id}`;
       return (
         <article class="blog-item">
           <a href={path} class="post-link" data-astro-prefetch>
-            <time datetime={p.data.dateCreated.toISOString()}>
-              {formatDate(p.data.dateCreated)}
-            </time>
+            <div class="post-meta">
+              <time datetime={p.data.dateCreated.toISOString()}>
+                {formatDate(p.data.dateCreated)}
+              </time>
+              <span class="post-views" data-post-views={path} hidden>
+                <span data-views-value>0</span> 次阅读
+              </span>
+            </div>
             <h2 class="post-title">{p.data.title}</h2>
             <p class="post-desc">{getPostDescription(p)}</p>
           </a>
@@ -67,13 +75,33 @@ function formatDate(date: Date) {
     border-radius: 2px;
   }
 
-  .post-link time {
-    display: block;
+  .visitor-count {
+    margin: 0 0 1.25rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-align: right;
+    color: color-mix(in srgb, currentColor 40%, transparent);
+  }
+
+  .visitor-count span {
+    color: color-mix(in srgb, currentColor 75%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
     font-size: 0.7rem;
     letter-spacing: 0.06em;
     color: color-mix(in srgb, currentColor 40%, transparent);
     font-variant-numeric: tabular-nums;
     margin-bottom: 0.5rem;
+  }
+
+  .post-views::before {
+    content: "·";
+    margin-right: 0.75rem;
   }
 
   .post-title {
@@ -168,4 +196,47 @@ function formatDate(date: Date) {
   document.addEventListener("astro:page-load", () => {
     scheduleScrollAnimations();
   });
+</script>
+
+<script>
+  import { actions } from "astro:actions";
+
+  async function hydrateActiveVisitors() {
+    const box = document.querySelector<HTMLElement>("[data-visitor-count]");
+    const value = box?.querySelector<HTMLElement>("[data-active-visitors]");
+    if (!box || !value) return;
+
+    const { data, error } = await actions.getActiveVisitors();
+    if (error || !data) return;
+
+    value.textContent = String(data);
+    box.hidden = false;
+  }
+
+  async function hydratePostViews() {
+    const badges = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-post-views]"),
+    );
+    if (!badges.length) return;
+
+    const paths = badges.map((el) => el.dataset.postViews ?? "");
+    const { data, error } = await actions.getVisitorsBatch(paths);
+    if (error || !data) return;
+
+    const viewsByPath = new Map(
+      data.map((item) => [item.path, item.totalPageviews]),
+    );
+
+    badges.forEach((badge) => {
+      const views = viewsByPath.get(badge.dataset.postViews ?? "") ?? 0;
+      if (views <= 0) return;
+
+      const value = badge.querySelector<HTMLElement>("[data-views-value]");
+      if (value) value.textContent = views.toLocaleString("zh-CN");
+      badge.hidden = false;
+    });
+  }
+
+  // 页面是预渲染的，统计数字在客户端补齐；拿不到数据就保持隐藏
+  void Promise.allSettled([hydrateActiveVisitors(), hydratePostViews()]);
 </script>

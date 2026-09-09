@@ -17,9 +17,8 @@ type UmamiStatsResponse = {
   visitors?: number;
 };
 
-type UmamiActiveResponse = {
-  visitors?: number;
-};
+// 自建版返回 [{ x }]，Cloud 返回 { visitors }
+type UmamiActiveResponse = { visitors?: number } | Array<{ x?: number }>;
 
 type UmamiMetricResponse = Array<{
   x?: string;
@@ -306,6 +305,7 @@ export const umami = {
           `websites/${websiteId}/active`,
         );
         if (!data) return null;
+        if (Array.isArray(data)) return data[0]?.x ?? 0;
 
         return data.visitors ?? 0;
       } catch (error) {
@@ -337,18 +337,15 @@ export const umami = {
 
   async getVisitorsBatch(paths: string[]) {
     const metrics = await fetchVisitorMetrics();
+    // Umami Cloud 限速 50 次 / 15 秒，metrics 失败时不要再逐篇回退请求
     if (!metrics) {
-      return Promise.all(
-        paths.map(async (path) => ({
-          path,
-          ...(await this.getVisitors(path)),
-        })),
-      );
+      return paths.map((path) => ({ path, ...zeroStats() }));
     }
 
     return paths.map((path) => {
       const candidates = buildPathCandidates(path);
-      const totalVisitors = candidates.reduce((best, candidate) => {
+      // metrics?type=url 的 y 是 pageviews，不是 visitors
+      const totalPageviews = candidates.reduce((best, candidate) => {
         const normalizedCandidate = normalizePath(candidate);
         if (!normalizedCandidate) return best;
         return Math.max(best, metrics.get(normalizedCandidate) ?? 0);
@@ -356,9 +353,9 @@ export const umami = {
 
       return {
         path,
-        totalPageviews: 0,
+        totalPageviews,
         totalSessions: 0,
-        totalVisitors,
+        totalVisitors: 0,
       };
     });
   },

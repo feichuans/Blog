@@ -48,13 +48,7 @@ export const server = {
       }>
     > {
       assertAllowedOrigin(context.request);
-
-      return Promise.all(
-        paths.map(async (path) => ({
-          path,
-          ...(await umami.getVisitors(path)),
-        })),
-      );
+      return umami.getVisitorsBatch(paths);
     },
   }),
   getVisitors: defineAction({
