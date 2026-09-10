@@ -4,6 +4,7 @@
    tailwind-v4.css 自身已 @import tokens.css，无需再引一次。 */
 @import "@feichuan/tokens/tailwind";
 @import "./new.css";
+@import "./layout.css";
 @plugin "@tailwindcss/typography";
 
 /* 与 global.css 保持同一份定义 —— 两条引入链各自编译，变体不会互相继承。

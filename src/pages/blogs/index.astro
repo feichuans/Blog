@@ -7,10 +7,10 @@ import BlogList from "@/components/blog/BlogList.astro";
   title="Writing"
   description="Feichuan 的前端开发、AI Agent、Web 动效与工程实践文章。"
 >
-  <main class="blogs-page">
-    <header class="blogs-header">
-      <h1 class="blogs-title">Writing</h1>
-      <p class="blogs-subtitle">记录思考与实践</p>
+  <main class="site-page site-shell site-shell--reading">
+    <header class="site-header">
+      <h1 class="site-title">Writing</h1>
+      <p class="site-lead">记录思考与实践</p>
     </header>
 
     <section class="blogs-content">
@@ -18,41 +18,3 @@ import BlogList from "@/components/blog/BlogList.astro";
     </section>
   </main>
 </Base>
-
-<style>
-  .blogs-page {
-    min-height: 100vh;
-    padding: 10rem 1.5rem 6rem;
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  .blogs-header {
-    margin-bottom: 4rem;
-  }
-
-  .blogs-title {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    margin: 0;
-  }
-
-  .blogs-subtitle {
-    margin-top: 0.75rem;
-    font-size: 0.8rem;
-    letter-spacing: 0.08em;
-    color: color-mix(in srgb, currentColor 45%, transparent);
-  }
-
-  @media (max-width: 640px) {
-    .blogs-page {
-      padding: 7rem 1.25rem 4rem;
-    }
-
-    .blogs-header {
-      margin-bottom: 3rem;
-    }
-  }
-</style>

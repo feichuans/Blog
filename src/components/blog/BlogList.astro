@@ -25,6 +25,7 @@ function formatDate(date: Date) {
       return (
         <article class="blog-item">
           <a href={path} class="post-link" data-astro-prefetch>
+            <h2 class="post-title">{p.data.title}</h2>
             <div class="post-meta">
               <time datetime={p.data.dateCreated.toISOString()}>
                 {formatDate(p.data.dateCreated)}
@@ -33,7 +34,6 @@ function formatDate(date: Date) {
                 <span data-views-value>0</span> 次阅读
               </span>
             </div>
-            <h2 class="post-title">{p.data.title}</h2>
             <p class="post-desc">{getPostDescription(p)}</p>
           </a>
         </article>
@@ -50,23 +50,16 @@ function formatDate(date: Date) {
   }
 
   .blog-item {
-    border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
-  }
-
-  .blog-item:first-child {
-    border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+    min-width: 0;
+    border-bottom: 1px solid var(--fc-border);
   }
 
   .post-link {
     display: block;
-    padding: 1.75rem 0;
+    padding-block: var(--fc-space-8);
     color: inherit;
     text-decoration: none;
-    transition: padding-left 280ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-
-  .post-link:hover {
-    padding-left: 0.75rem;
+    overflow-wrap: anywhere;
   }
 
   .post-link:focus-visible {
@@ -77,26 +70,27 @@ function formatDate(date: Date) {
 
   .visitor-count {
     margin: 0 0 1.25rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
+    font-size: var(--fc-text-sm);
+    line-height: var(--fc-leading-snug);
     text-align: right;
-    color: color-mix(in srgb, currentColor 40%, transparent);
+    color: var(--fc-ink-meta);
   }
 
   .visitor-count span {
-    color: color-mix(in srgb, currentColor 75%, transparent);
+    color: var(--fc-ink-muted);
     font-variant-numeric: tabular-nums;
   }
 
   .post-meta {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.75rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    color: color-mix(in srgb, currentColor 40%, transparent);
+    gap: var(--fc-space-2) var(--fc-space-3);
+    font-size: var(--fc-text-sm);
+    line-height: var(--fc-leading-snug);
+    color: var(--fc-ink-meta);
     font-variant-numeric: tabular-nums;
-    margin-bottom: 0.5rem;
+    margin-block: var(--fc-space-2) var(--fc-space-3);
   }
 
   .post-views::before {
@@ -106,33 +100,36 @@ function formatDate(date: Date) {
 
   .post-title {
     margin: 0;
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-size: var(--site-heading-size);
     font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: -0.01em;
+    line-height: var(--fc-leading-snug);
+    letter-spacing: var(--fc-tracking-normal);
+    text-wrap: balance;
+    transition: color var(--fc-motion-hover);
   }
 
   .post-desc {
-    margin: 0.5rem 0 0;
-    font-size: 0.8rem;
-    line-height: 1.6;
-    color: color-mix(in srgb, currentColor 55%, transparent);
-    max-width: 560px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    margin: 0;
+    font-size: var(--fc-text-lg);
+    line-height: var(--fc-leading-body);
+    color: var(--fc-ink-muted);
+    max-width: var(--fc-layout-prose-max);
+    text-wrap: pretty;
   }
 
   @media (max-width: 640px) {
     .post-link {
-      padding: 1.25rem 0;
-    }
-
-    .post-link:hover {
-      padding-left: 0.5rem;
+      padding-block: var(--fc-space-6);
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .post-link {
-      transition: none;
+  @media (hover: hover) and (pointer: fine) {
+    .post-link:hover .post-title {
+      color: var(--fc-accent);
     }
   }
 </style>
@@ -159,6 +156,11 @@ function formatDate(date: Date) {
       }
     });
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(blogItems, { clearProps: "transform,opacity" });
+      return;
+    }
+
     blogItems.forEach((item, index) => {
       gsap.set(item, {
         y: 40,
@@ -169,7 +171,6 @@ function formatDate(date: Date) {
         y: 0,
         opacity: 1,
         duration: 0.7,
-        delay: index * 0.05,
         ease: "power2.out",
         scrollTrigger: {
           trigger: item,

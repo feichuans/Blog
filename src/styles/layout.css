@@ -1,0 +1,81 @@
+/* Shared page typography and reading geometry. Both stylesheet entrypoints
+ * import this file; demo surfaces opt in rather than inheriting page styles. */
+:root {
+  --site-gutter: clamp(var(--fc-layout-gutter-phone), calc(8vw - 2rem), var(--fc-layout-gutter-desktop));
+  --site-page-top: clamp(6rem, 10vw, 8rem);
+  --site-section-gap: clamp(var(--fc-space-12), 8vw, var(--fc-space-24));
+  --site-header-gap: clamp(var(--fc-space-8), 5vw, var(--fc-space-16));
+  --site-title-size: clamp(var(--fc-text-3xl), calc(1.3rem + 1.5vw), var(--fc-text-4xl));
+  --site-heading-size: clamp(var(--fc-text-xl), calc(1rem + 0.6vw), var(--fc-text-2xl));
+}
+
+.site-shell {
+  position: relative;
+  z-index: 1;
+  inline-size: 100%;
+  max-inline-size: var(--fc-layout-container-max);
+  margin-inline: auto;
+  padding-inline: var(--site-gutter);
+}
+
+.site-shell--reading {
+  max-inline-size: calc(var(--fc-layout-prose-max) + 2 * var(--site-gutter));
+}
+
+.site-page {
+  min-block-size: 100svh;
+  padding-block: var(--site-page-top) var(--site-section-gap);
+  color: var(--fc-ink);
+  font-size: var(--fc-text-lg);
+  line-height: var(--fc-leading-body);
+  letter-spacing: var(--fc-tracking-normal);
+}
+
+.site-header {
+  display: grid;
+  gap: var(--fc-space-4);
+  margin-block-end: var(--site-header-gap);
+}
+
+.site-title,
+.site-heading {
+  margin: 0;
+  color: var(--fc-ink);
+  font-weight: 600;
+  line-height: var(--fc-leading-tight);
+  letter-spacing: var(--fc-tracking-normal);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.site-title {
+  font-size: var(--site-title-size);
+}
+
+.site-heading {
+  font-size: var(--site-heading-size);
+}
+
+.site-lead {
+  max-inline-size: var(--fc-layout-prose-max);
+  margin: 0;
+  color: var(--fc-ink-muted);
+  font-size: var(--fc-text-lg);
+  line-height: var(--fc-leading-body);
+  letter-spacing: var(--fc-tracking-normal);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.site-meta {
+  margin: 0;
+  color: var(--fc-ink-meta);
+  font-size: var(--fc-text-sm);
+  line-height: var(--fc-leading-snug);
+  font-variant-numeric: tabular-nums;
+}
+
+.site-flow {
+  display: grid;
+  gap: var(--site-section-gap);
+}

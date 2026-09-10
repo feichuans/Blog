@@ -9,6 +9,7 @@
    global.css 与 tailwind.css 是两条独立引入链（前者供文章与多数页面，
    后者供首页与 about），两边都要引，否则一半页面拿不到 --fc-*。 */
 @import "@feichuan/tokens/tailwind";
+@import "./layout.css";
 @plugin "@tailwindcss/typography";
 
 /*
