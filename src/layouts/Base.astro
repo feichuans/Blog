@@ -63,7 +63,7 @@ const {
 
     <div class:list={["smooth-wrapper", enableIntro && "slot"]}>
       <div
-        class="background w-screen smooth-content"
+        class="background w-full smooth-content"
       >
         <slot />
         {showFooter && <Footer />}
@@ -94,17 +94,6 @@ const {
       import Lenis from "lenis";
       import { gsap } from "gsap";
       import { ScrollTrigger } from "gsap/ScrollTrigger";
-      import { isMobileDevice } from "@/lib/utils";
-      window.addEventListener("load", () => {
-        if (isMobileDevice()) {
-          window.location.href = "/mobile";
-        }
-      });
-      window.addEventListener("resize", () => {
-        if (isMobileDevice()) {
-          window.location.href = "/mobile";
-        }
-      });
       gsap.registerPlugin(ScrollTrigger);
 
       // 获取滚动容器
@@ -120,8 +109,7 @@ const {
         gestureOrientation: "vertical", // 手势方向
         smoothWheel: true, // 平滑鼠标滚轮
         wheelMultiplier: 1.2, // 滚轮速度倍数
-        smoothTouch: false, // 移动端触摸滚动是否平滑（建议关闭以保持原生体验）
-        // touchMultiplier: 2, // 触摸滚动速度倍数
+        syncTouch: false, // 触屏保留原生滚动，桌面继续使用平滑滚轮。
         infinite: false, // 是否无限滚动
       });
 
@@ -171,7 +159,8 @@ const {
         width: 100%;
         height: 100vh;
         height: 100dvh;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
 
       .smooth-content {
