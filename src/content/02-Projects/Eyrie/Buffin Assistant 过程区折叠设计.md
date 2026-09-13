@@ -130,3 +130,4 @@ tool-call × N / receipts
 - Claude Opus 5 独立评审（herdr w19，plan 只读模式，2026-08-08，NOT READY 后修正，评审全文写入 ~/.claude/plans/agent-claude-code-buffin-stateful-tiger.md）
 - Buffin 源码抽查（session-store.ts / thread-presentation.ts / SessionThread.tsx / use-auto-scroll-bottom.ts / protocol.ts / translator.ts / runner.ts / drizzle-repository.ts / service.ts，2026-08-08）
 - GitHub issue buffin-ai/buffin#215
+- [[Buffin Session 界面性能]] — 折叠已落地，但 mountChildren + keepMounted 让折叠内容仍占 DOM
