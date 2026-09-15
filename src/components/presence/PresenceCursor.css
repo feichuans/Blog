@@ -6,9 +6,9 @@
   width: 1.5rem;
   height: 1.5rem;
   pointer-events: none;
-  transition:
-    transform 80ms linear,
-    opacity 160ms ease;
+  /* transform 交给 motion 的弹簧逐帧写，留 CSS transition 会和它抢同一条属性。 */
+  transition: opacity 160ms ease;
+  will-change: transform;
 }
 
 .presence-cursor-glyph {
@@ -95,7 +95,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .presence-cursor,
+  .presence-cursor {
+    transition: none;
+    will-change: auto;
+  }
+
   .presence-cursor-glyph {
     transition: none;
   }

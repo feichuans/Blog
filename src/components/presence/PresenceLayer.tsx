@@ -1,27 +1,13 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  Ban,
-  Grab,
-  HandGrab,
-  MousePointer2,
-  MousePointerClick,
-  Move,
-  Pointer,
-  TextCursor,
-  type LucideIcon,
-} from "lucide-react";
 import { useUiSound } from "@/hooks/use-ui-sound";
 import {
   readPresenceOptIn,
   usePresence,
   writePresenceOptIn,
 } from "@/hooks/use-presence";
-import { docToViewport } from "@/lib/presence/coords";
-import {
-  isPresenceCursorState,
-  type PresenceCursorState,
-} from "@/lib/presence/protocol";
+import { isPresenceCursorState } from "@/lib/presence/protocol";
+import { PresenceCursor } from "./PresenceCursor";
 import "./PresenceLayer.css";
 import "./PresenceCursor.css";
 
@@ -29,18 +15,6 @@ type Props = {
   room: string;
   path: string;
   placement?: "nav" | "fixed";
-};
-
-const cursorIcons: Record<PresenceCursorState, LucideIcon> = {
-  default: MousePointer2,
-  pointer: Pointer,
-  text: TextCursor,
-  select: TextCursor,
-  move: Move,
-  grab: Grab,
-  grabbing: HandGrab,
-  click: MousePointerClick,
-  blocked: Ban,
 };
 
 export function PresenceLayer({
@@ -51,7 +25,7 @@ export function PresenceLayer({
   const { play } = useUiSound();
   const [enabled, setEnabled] = useState(false);
   const [navHost, setNavHost] = useState<HTMLElement | null>(null);
-  const [tick, setTick] = useState(0);
+  // 每个光标自己跑弹簧和重投影，这里只负责渲染列表。
   const { status, count, peers } = usePresence(room, path, enabled);
 
   useEffect(() => {
@@ -60,27 +34,6 @@ export function PresenceLayer({
       setNavHost(document.querySelector<HTMLElement>("[data-presence-host]"));
     }
   }, [placement]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    let raf = 0;
-    const bump = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        setTick((n) => n + 1);
-      });
-    };
-    window.addEventListener("lenis-scroll", bump);
-    window.addEventListener("scroll", bump, { passive: true });
-    window.addEventListener("resize", bump);
-    return () => {
-      window.removeEventListener("lenis-scroll", bump);
-      window.removeEventListener("scroll", bump);
-      window.removeEventListener("resize", bump);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [enabled]);
 
   const countLabel = status === "live" ? String(count) : "0";
   const detailLabel =
@@ -122,38 +75,24 @@ export function PresenceLayer({
   );
 
   return (
-    <div className="presence-layer g-not" data-tick={tick}>
+    <div className="presence-layer g-not">
       {placement === "nav" ? navHost && createPortal(toggle, navHost) : toggle}
 
       {enabled &&
         peers.map((peer) => {
           if (peer.path !== path) return null;
           if (peer.x === null || peer.y === null) return null;
-          const point = docToViewport(peer.x, peer.y);
-          const hidden =
-            point.left < -32 ||
-            point.top < -32 ||
-            point.left > window.innerWidth + 32 ||
-            point.top > window.innerHeight + 32;
           const cursor = isPresenceCursorState(peer.cursor)
             ? peer.cursor
             : "default";
-          const CursorIcon = cursorIcons[cursor];
           return (
-            <div
+            <PresenceCursor
               key={peer.id}
-              className="presence-cursor"
-              data-cursor={cursor}
-              data-hidden={hidden ? "true" : "false"}
-              style={{
-                transform: `translate(${point.left}px, ${point.top}px)`,
-                ["--presence-color" as string]: peer.color,
-              }}
-            >
-              <span className="presence-cursor-glyph">
-                <CursorIcon aria-hidden="true" />
-              </span>
-            </div>
+              x={peer.x}
+              y={peer.y}
+              cursor={cursor}
+              color={peer.color}
+            />
           );
         })}
     </div>
