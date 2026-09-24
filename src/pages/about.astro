@@ -52,10 +52,33 @@ const projects = [
     <BaseHead title="About" description="Feichuan 的个人介绍、技术方向与项目经历。" ogType="website" />
     <!-- 只取 orb 对话区实际用到的 Inter 400/500。
          Lora 全仓零引用；Inter 600 同样未使用，一并去掉。
-         preconnect 保留在请求之前，避免改动引入新的握手延迟。 -->
+
+         非阻塞加载：preload 先拿到 CSS，再用 media=print 的 link 提权。
+         两个 link 都带 crossorigin —— 否则 preload 走 CORS、stylesheet 走
+         no-cors，浏览器当成两个请求，会白下载一遍（实测会重复 1.1KB）。
+         Google Fonts 返回 access-control-allow-origin: *，CORS 模式可用。
+         提权前 orb 对话文字短暂回退到 ui-sans-serif，而该对话区初始
+         opacity 为 0、需要交互才显现，肉眼无可感差异。 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+    <link
+      rel="preload"
+      as="style"
+      crossorigin
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      media="print"
+      crossorigin
+      onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap"
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap"
+    /></noscript>
   </head>
   <body>
     <SiteMenu />
