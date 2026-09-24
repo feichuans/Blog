@@ -244,12 +244,12 @@ function loadStampImage(src: string) {
   })
 }
 
-/** Cover-fit 站点图到票面内框，齿孔留给后面 destination-in。 */
+/** Contain-fit 站点图进票心，四周留纸边，对齐抽象票面的内框。 */
 function paintPhoto(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
-  const pad = 28
+  const pad = 52
   const boxW = w - pad * 2
   const boxH = h - pad * 2
-  const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight)
+  const scale = Math.min(boxW / img.naturalWidth, boxH / img.naturalHeight)
   const dw = img.naturalWidth * scale
   const dh = img.naturalHeight * scale
   const dx = pad + (boxW - dw) / 2
