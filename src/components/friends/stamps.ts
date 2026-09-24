@@ -2,8 +2,8 @@
  * 邮票数据 —— 友链版。
  *
  * 从 quickDemos/stamp-impasto 移植：布局/纹理结构原样保留，
- * 数据换成朋友与常读站点。票面美术是 5 种抽象画法（kind 决定），
- * 名字在悬停 pill 与灯箱里展示。
+ * 数据换成朋友与常读站点。票面默认是 5 种抽象画法（kind 决定）；
+ * 有 image 时改铺站点图作票面底。名字在悬停 pill 与灯箱里展示。
  */
 
 export type FriendItem = {
@@ -11,6 +11,8 @@ export type FriendItem = {
   url: string
   desc: string
   kind?: '互链' | '常读'
+  /** 站点图，铺成邮票票面底。浏览器能画进 canvas 的位图即可。 */
+  image?: string
 }
 
 export type StampId = string
@@ -37,6 +39,8 @@ export type StampDef = {
   /** Portrait aspect: width / height of face art */
   aspect: number
   kind: 'new-craft' | 'kensho' | 'specimen' | 'gaoling' | 'motou'
+  /** 有值时票面铺这张图，不再走抽象画法 */
+  image?: string
 }
 
 /** 5 种票面画法按序循环 */
@@ -90,6 +94,7 @@ export function buildStamps(items: FriendItem[]): StampDef[] {
       z: slot.z,
       aspect: ASPECTS[i % ASPECTS.length],
       kind: KINDS[i % KINDS.length],
+      image: item.image,
     }
   })
 }

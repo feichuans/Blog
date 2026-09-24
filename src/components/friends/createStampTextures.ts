@@ -235,6 +235,28 @@ function paintFace(kind: StampDef['kind'], ctx: CanvasRenderingContext2D, w: num
   }
 }
 
+function loadStampImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error(`stamp image failed: ${src}`))
+    img.src = src
+  })
+}
+
+/** Cover-fit 站点图到票面内框，齿孔留给后面 destination-in。 */
+function paintPhoto(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
+  const pad = 28
+  const boxW = w - pad * 2
+  const boxH = h - pad * 2
+  const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight)
+  const dw = img.naturalWidth * scale
+  const dh = img.naturalHeight * scale
+  const dx = pad + (boxW - dw) / 2
+  const dy = pad + (boxH - dh) / 2
+  ctx.drawImage(img, dx, dy, dw, dh)
+}
+
 /** Fine sand-grit microheight — not oil ridges. */
 function createSandGritHeight(
   w: number,
@@ -363,8 +385,17 @@ async function buildStampTextures(stamp: StampDef): Promise<StampTextures> {
   const actx = albedo.getContext('2d')!
   actx.fillStyle = '#f2eee6'
   actx.fillRect(0, 0, w, h)
-  paintFace(stamp.kind, actx, w, h)
-  paperGrain(actx, w, h, 0.05)
+  if (stamp.image) {
+    try {
+      const photo = await loadStampImage(stamp.image)
+      paintPhoto(actx, photo, w, h)
+    } catch {
+      paintFace(stamp.kind, actx, w, h)
+    }
+  } else {
+    paintFace(stamp.kind, actx, w, h)
+  }
+  paperGrain(actx, w, h, stamp.image ? 0.03 : 0.05)
 
   const mask = document.createElement('canvas')
   mask.width = w

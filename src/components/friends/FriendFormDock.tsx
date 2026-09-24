@@ -175,7 +175,6 @@ function FriendForm({
     const fd = new FormData(form)
     const name = clean(String(fd.get('name') ?? ''))
     const url = toUrl(String(fd.get('url') ?? ''))
-    const avatar = toUrl(String(fd.get('avatar') ?? ''))
     const desc = clean(String(fd.get('desc') ?? ''))
     const email = clean(String(fd.get('email') ?? ''))
 
@@ -184,7 +183,6 @@ function FriendForm({
     if (!url) errors.push('网址不能为空')
     else if (!isHttpUrl(url)) errors.push('网址需是完整的 http(s) 地址')
     if (!desc) errors.push('一句话不能为空')
-    if (avatar && !isHttpUrl(avatar)) errors.push('头像地址需是完整的 http(s) 地址')
 
     if (errors.length > 0) {
       setResult('')
@@ -195,7 +193,6 @@ function FriendForm({
     const lines = [
       `name   ${name}`,
       `url    ${url}`,
-      avatar ? `avatar ${avatar}` : '',
       `desc   ${desc}`,
       email ? `email  ${email}` : '',
     ].filter(Boolean)
@@ -265,10 +262,6 @@ function FriendForm({
             网址 <em className="req">必填</em>
           </span>
           <input type="url" name="url" required placeholder="https://example.com" inputMode="url" />
-        </label>
-        <label className="form-field">
-          <span className="form-label">头像</span>
-          <input type="url" name="avatar" placeholder="https://example.com/avatar.webp" inputMode="url" />
         </label>
         <label className="form-field form-field-wide">
           <span className="form-label">
