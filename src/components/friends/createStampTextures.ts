@@ -2,9 +2,6 @@ import type { StampDef } from './stamps'
 
 const SIZE = 512
 
-/** 铺图前先裁掉的源图边缘比例，用来去除源图自带的齿孔/描边装饰。 */
-const PHOTO_INSET = 0.02
-
 /** Classic postage perforation silhouette (scalloped edge path). */
 function drawPerforationMask(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const tooth = 13
@@ -248,20 +245,15 @@ function loadStampImage(src: string) {
 }
 
 /**
- * Cover-fit 铺满票面。
- * 源图自带的边缘装饰（如这张 SVG 的齿孔）先按 2% 内缩裁掉，
- * 齿孔统一由 drawPerforationMask 给，避免两套齿距叠在一起。
+ * 铺满画布。画布已按源图比例生成，所以这里不会裁切也不会变形。
  */
 function paintPhoto(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
-  const inset = Math.round(Math.min(img.naturalWidth, img.naturalHeight) * PHOTO_INSET)
-  const sw = img.naturalWidth - inset * 2
-  const sh = img.naturalHeight - inset * 2
-  const scale = Math.max(w / sw, h / sh)
-  const dw = sw * scale
-  const dh = sh * scale
+  const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight)
+  const dw = img.naturalWidth * scale
+  const dh = img.naturalHeight * scale
   const dx = (w - dw) / 2
   const dy = (h - dh) / 2
-  ctx.drawImage(img, inset, inset, sw, sh, dx, dy, dw, dh)
+  ctx.drawImage(img, dx, dy, dw, dh)
 }
 
 /** Fine sand-grit microheight — not oil ridges. */
@@ -382,9 +374,11 @@ export async function createStampTextures(stamp: StampDef): Promise<StampTexture
 }
 
 async function buildStampTextures(stamp: StampDef): Promise<StampTextures> {
-  const w = SIZE
-  const h = Math.round(SIZE / stamp.aspect)
   const photo = stamp.image ? await loadStampImage(stamp.image).catch(() => null) : null
+  // 有图时画布按源图原始比例，最长边收到 SIZE：图不裁、不变形，只等比缩小。
+  const ratio = photo ? photo.naturalWidth / photo.naturalHeight : stamp.aspect
+  const w = ratio >= 1 ? SIZE : Math.max(1, Math.round(SIZE * ratio))
+  const h = ratio >= 1 ? Math.max(1, Math.round(SIZE / ratio)) : SIZE
 
   // --- albedo ---
   const albedo = document.createElement('canvas')

@@ -92,7 +92,7 @@ export function buildStamps(items: FriendItem[]): StampDef[] {
       rotation: slot.rotation,
       scale: slot.scale,
       z: slot.z,
-      aspect: ASPECTS[i % ASPECTS.length],
+      aspect: item.image ? 1 : ASPECTS[i % ASPECTS.length],
       kind: KINDS[i % KINDS.length],
       image: item.image,
     }
