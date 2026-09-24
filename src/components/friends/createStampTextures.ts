@@ -2,6 +2,9 @@ import type { StampDef } from './stamps'
 
 const SIZE = 512
 
+/** 铺图前先裁掉的源图边缘比例，用来去除源图自带的齿孔/描边装饰。 */
+const PHOTO_INSET = 0.02
+
 /** Classic postage perforation silhouette (scalloped edge path). */
 function drawPerforationMask(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const tooth = 13
@@ -244,26 +247,21 @@ function loadStampImage(src: string) {
   })
 }
 
-const PHOTO_PERFORATION = '/images/friends/stamp-perforation.svg'
-
-/** 零内边距 cover，铺满整张票面。 */
+/**
+ * Cover-fit 铺满票面。
+ * 源图自带的边缘装饰（如这张 SVG 的齿孔）先按 2% 内缩裁掉，
+ * 齿孔统一由 drawPerforationMask 给，避免两套齿距叠在一起。
+ */
 function paintPhoto(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
-  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight)
-  const dw = img.naturalWidth * scale
-  const dh = img.naturalHeight * scale
+  const inset = Math.round(Math.min(img.naturalWidth, img.naturalHeight) * PHOTO_INSET)
+  const sw = img.naturalWidth - inset * 2
+  const sh = img.naturalHeight - inset * 2
+  const scale = Math.max(w / sw, h / sh)
+  const dw = sw * scale
+  const dh = sh * scale
   const dx = (w - dw) / 2
   const dy = (h - dh) / 2
-  ctx.drawImage(img, dx, dy, dw, dh)
-}
-
-function paintTemplateMask(
-  ctx: CanvasRenderingContext2D,
-  mask: HTMLImageElement,
-  w: number,
-  h: number,
-) {
-  ctx.clearRect(0, 0, w, h)
-  ctx.drawImage(mask, 0, 0, w, h)
+  ctx.drawImage(img, inset, inset, sw, sh, dx, dy, dw, dh)
 }
 
 /** Fine sand-grit microheight — not oil ridges. */
@@ -406,13 +404,7 @@ async function buildStampTextures(stamp: StampDef): Promise<StampTextures> {
   mask.width = w
   mask.height = h
   const mctx = mask.getContext('2d')!
-  if (photo) {
-    const template = await loadStampImage(PHOTO_PERFORATION).catch(() => null)
-    if (template) paintTemplateMask(mctx, template, w, h)
-    else drawPerforationMask(mctx, w, h)
-  } else {
-    drawPerforationMask(mctx, w, h)
-  }
+  drawPerforationMask(mctx, w, h)
 
   actx.globalCompositeOperation = 'destination-in'
   actx.drawImage(mask, 0, 0)

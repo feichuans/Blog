@@ -3,7 +3,7 @@
  *
  * 从 quickDemos/stamp-impasto 移植：布局/纹理结构原样保留，
  * 数据换成朋友与常读站点。票面默认是 5 种抽象画法（kind 决定）；
- * 有 image 时改铺站点图作票面底。名字在悬停 pill 与灯箱里展示。
+ * 有 image 时改铺站点图作票面底。两者共用同一套票面宽高与齿孔。
  */
 
 export type FriendItem = {
@@ -92,7 +92,7 @@ export function buildStamps(items: FriendItem[]): StampDef[] {
       rotation: slot.rotation,
       scale: slot.scale,
       z: slot.z,
-      aspect: item.image ? 1 : ASPECTS[i % ASPECTS.length],
+      aspect: ASPECTS[i % ASPECTS.length],
       kind: KINDS[i % KINDS.length],
       image: item.image,
     }
