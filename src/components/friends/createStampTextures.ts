@@ -244,17 +244,22 @@ function loadStampImage(src: string) {
   })
 }
 
-/** Contain-fit 站点图进票心，四周留纸边，对齐抽象票面的内框。 */
+/** Cover-fit 进和其他票面相同的 pad=28 内框，溢出裁掉，不贴齿孔。 */
 function paintPhoto(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
-  const pad = 52
+  const pad = 28
   const boxW = w - pad * 2
   const boxH = h - pad * 2
-  const scale = Math.min(boxW / img.naturalWidth, boxH / img.naturalHeight)
+  const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight)
   const dw = img.naturalWidth * scale
   const dh = img.naturalHeight * scale
   const dx = pad + (boxW - dw) / 2
   const dy = pad + (boxH - dh) / 2
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(pad, pad, boxW, boxH)
+  ctx.clip()
   ctx.drawImage(img, dx, dy, dw, dh)
+  ctx.restore()
 }
 
 /** Fine sand-grit microheight — not oil ridges. */
