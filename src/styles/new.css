@@ -2,8 +2,11 @@
   body {
     margin: 0;
     min-height: 100dvh;
-    min-width: 100dvw;
     -webkit-font-smoothing: antialiased;
+    /* 不要 min-width: 100dvw。vw/dvw 含纵向滚动条宽度（Chromium 恒 15px），
+       而 body 只被滚动区约束 —— 一旦纵向可滚动，body 就比滚动区宽 15px，
+       文档根立刻可横向滚动，贴右边缘的宽子元素（.homepage-card）会把这条
+       横向滚动条顶出来。body 是块级元素，横向铺满本来就是默认行为。 */
   }
 
   main {

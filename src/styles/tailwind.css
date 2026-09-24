@@ -22,7 +22,9 @@
 
 @layer components {
   .homepage-card {
-    width: calc(100vw - 1.5rem);
+    /* 基准是内容区宽而非 100vw：100vw 含纵向滚动条宽度，卡片右边缘会越过
+       滚动区右界，撑出横向滚动条。父级 main 已满宽，这里减掉左右各 0.75rem。 */
+    width: calc(100% - 1.5rem);
     height: calc(100vh - 1.5rem);
     flex: none;
     overflow: hidden;
