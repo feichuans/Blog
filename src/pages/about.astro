@@ -50,9 +50,12 @@ const projects = [
 <html lang="en">
   <head>
     <BaseHead title="About" description="Feichuan 的个人介绍、技术方向与项目经历。" ogType="website" />
+    <!-- 只取 orb 对话区实际用到的 Inter 400/500。
+         Lora 全仓零引用；Inter 600 同样未使用，一并去掉。
+         preconnect 保留在请求之前，避免改动引入新的握手延迟。 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   </head>
   <body>
     <SiteMenu />
