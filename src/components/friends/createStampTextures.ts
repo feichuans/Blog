@@ -244,22 +244,26 @@ function loadStampImage(src: string) {
   })
 }
 
-/** Cover-fit 进和其他票面相同的 pad=28 内框，溢出裁掉，不贴齿孔。 */
+const PHOTO_PERFORATION = '/images/friends/stamp-perforation.svg'
+
+/** 零内边距 cover，铺满整张票面。 */
 function paintPhoto(ctx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
-  const pad = 28
-  const boxW = w - pad * 2
-  const boxH = h - pad * 2
-  const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight)
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight)
   const dw = img.naturalWidth * scale
   const dh = img.naturalHeight * scale
-  const dx = pad + (boxW - dw) / 2
-  const dy = pad + (boxH - dh) / 2
-  ctx.save()
-  ctx.beginPath()
-  ctx.rect(pad, pad, boxW, boxH)
-  ctx.clip()
+  const dx = (w - dw) / 2
+  const dy = (h - dh) / 2
   ctx.drawImage(img, dx, dy, dw, dh)
-  ctx.restore()
+}
+
+function paintTemplateMask(
+  ctx: CanvasRenderingContext2D,
+  mask: HTMLImageElement,
+  w: number,
+  h: number,
+) {
+  ctx.clearRect(0, 0, w, h)
+  ctx.drawImage(mask, 0, 0, w, h)
 }
 
 /** Fine sand-grit microheight — not oil ridges. */
@@ -382,6 +386,7 @@ export async function createStampTextures(stamp: StampDef): Promise<StampTexture
 async function buildStampTextures(stamp: StampDef): Promise<StampTextures> {
   const w = SIZE
   const h = Math.round(SIZE / stamp.aspect)
+  const photo = stamp.image ? await loadStampImage(stamp.image).catch(() => null) : null
 
   // --- albedo ---
   const albedo = document.createElement('canvas')
@@ -390,23 +395,24 @@ async function buildStampTextures(stamp: StampDef): Promise<StampTextures> {
   const actx = albedo.getContext('2d')!
   actx.fillStyle = '#f2eee6'
   actx.fillRect(0, 0, w, h)
-  if (stamp.image) {
-    try {
-      const photo = await loadStampImage(stamp.image)
-      paintPhoto(actx, photo, w, h)
-    } catch {
-      paintFace(stamp.kind, actx, w, h)
-    }
+  if (photo) {
+    paintPhoto(actx, photo, w, h)
   } else {
     paintFace(stamp.kind, actx, w, h)
+    paperGrain(actx, w, h, 0.05)
   }
-  paperGrain(actx, w, h, stamp.image ? 0.03 : 0.05)
 
   const mask = document.createElement('canvas')
   mask.width = w
   mask.height = h
   const mctx = mask.getContext('2d')!
-  drawPerforationMask(mctx, w, h)
+  if (photo) {
+    const template = await loadStampImage(PHOTO_PERFORATION).catch(() => null)
+    if (template) paintTemplateMask(mctx, template, w, h)
+    else drawPerforationMask(mctx, w, h)
+  } else {
+    drawPerforationMask(mctx, w, h)
+  }
 
   actx.globalCompositeOperation = 'destination-in'
   actx.drawImage(mask, 0, 0)
